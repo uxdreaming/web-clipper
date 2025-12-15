@@ -1,0 +1,20 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Build artifacts
+*.zip
+dist/
+
+# Logs
+*.log
+
+# Local config
+config.local.json

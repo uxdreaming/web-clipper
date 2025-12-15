@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a9eff"/>
+      <stop offset="100%" style="stop-color:#3a7edf"/>
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="60" fill="url(#bg)"/>
+  <!-- Clipboard shape -->
+  <rect x="35" y="28" width="58" height="76" rx="6" fill="white" opacity="0.95"/>
+  <!-- Clipboard top -->
+  <rect x="48" y="20" width="32" height="16" rx="4" fill="#2d6abf"/>
+  <!-- Lines representing text -->
+  <rect x="45" y="48" width="38" height="4" rx="2" fill="#4a9eff"/>
+  <rect x="45" y="60" width="32" height="4" rx="2" fill="#4a9eff" opacity="0.7"/>
+  <rect x="45" y="72" width="36" height="4" rx="2" fill="#4a9eff" opacity="0.5"/>
+  <rect x="45" y="84" width="28" height="4" rx="2" fill="#4a9eff" opacity="0.3"/>
+  <!-- Logseq-style bullet -->
+  <circle cx="45" cy="50" r="3" fill="#2d6abf"/>
+</svg>

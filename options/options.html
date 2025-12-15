@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logseq Web Clipper - Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Logseq Web Clipper Settings</h1>
+    </header>
+
+    <main>
+      <!-- General Settings -->
+      <section class="settings-section">
+        <h2>General</h2>
+
+        <div class="setting-item">
+          <label for="graphPath">Logseq Graph Path</label>
+          <div class="input-group">
+            <input type="text" id="graphPath" placeholder="~/Documents/logseq">
+            <button id="testConnection" class="btn btn-secondary">Test</button>
+          </div>
+          <p class="help-text">Path to your Logseq graph folder</p>
+        </div>
+
+        <div class="setting-item">
+          <label for="journalFormat">Journal Date Format</label>
+          <select id="journalFormat">
+            <option value="yyyy-MM-dd">yyyy-MM-dd (2024-01-15)</option>
+            <option value="yyyy_MM_dd">yyyy_MM_dd (2024_01_15)</option>
+            <option value="yyyy-MM-dd EEEE">yyyy-MM-dd EEEE (2024-01-15 Monday)</option>
+          </select>
+          <p class="help-text">Must match your Logseq journal format settings</p>
+        </div>
+
+        <div class="setting-item">
+          <label for="defaultFormat">Default Output Format</label>
+          <select id="defaultFormat">
+            <option value="markdown">Markdown</option>
+            <option value="logseq">Logseq Blocks</option>
+            <option value="template">Use Template</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <label for="defaultDestination">Default Destination</label>
+          <select id="defaultDestination">
+            <option value="journal">Journal (Daily Notes)</option>
+            <option value="page">Page</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <label for="theme">Theme</label>
+          <select id="theme">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="system">System Default</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Templates Section -->
+      <section class="settings-section">
+        <h2>Custom Templates</h2>
+        <p class="section-description">
+          Create custom templates for different types of content.
+          Available variables: <code>{{title}}</code>, <code>{{url}}</code>,
+          <code>{{date}}</code>, <code>{{content}}</code>, <code>{{selection}}</code>,
+          <code>{{author}}</code>, <code>{{tags}}</code>
+        </p>
+
+        <div class="template-list" id="templateList">
+          <!-- Templates will be loaded here -->
+        </div>
+
+        <button id="addTemplate" class="btn btn-secondary">+ Add Template</button>
+
+        <!-- Template Editor Modal -->
+        <div class="modal hidden" id="templateModal">
+          <div class="modal-content">
+            <h3 id="modalTitle">New Template</h3>
+            <div class="form-group">
+              <label for="templateName">Template Name</label>
+              <input type="text" id="templateName" placeholder="My Template">
+            </div>
+            <div class="form-group">
+              <label for="templateContent">Template Content</label>
+              <textarea id="templateContent" rows="10" placeholder="- **{{title}}**
+  url:: {{url}}
+  date:: {{date}}
+  - {{content}}"></textarea>
+            </div>
+            <div class="modal-actions">
+              <button id="cancelTemplate" class="btn btn-secondary">Cancel</button>
+              <button id="saveTemplate" class="btn btn-primary">Save</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Native Host Section -->
+      <section class="settings-section">
+        <h2>Native Host Status</h2>
+        <div class="status-indicator" id="hostStatus">
+          <span class="status-dot"></span>
+          <span class="status-text">Checking...</span>
+        </div>
+        <p class="help-text">
+          The native host is required to save content directly to your Logseq files.
+          <a href="#" id="installInstructions">Installation instructions</a>
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <button id="saveSettings" class="btn btn-primary">Save Settings</button>
+      <button id="resetSettings" class="btn btn-secondary">Reset to Defaults</button>
+    </footer>
+  </div>
+
+  <script src="../lib/storage.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

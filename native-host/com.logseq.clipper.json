@@ -1,0 +1,9 @@
+{
+  "name": "com.logseq.clipper",
+  "description": "Logseq Web Clipper Native Host",
+  "path": "/usr/local/bin/logseq-clipper-host",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://EXTENSION_ID_PLACEHOLDER/"
+  ]
+}
