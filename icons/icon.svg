@@ -1,37 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Background with vibrant gradient -->
   <defs>
-    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#14b8a6;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#0d7d79;stop-opacity:1" />
-    </linearGradient>
-    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="50%" stop-color="#0891b2"/>
+      <stop offset="100%" stop-color="#0e7490"/>
     </linearGradient>
   </defs>
-
-  <!-- Background rounded square -->
-  <rect x="8" y="8" width="112" height="112" rx="24" ry="24" fill="url(#grad1)"/>
-
-  <!-- Inner capture brackets - white -->
-  <!-- Top-left bracket -->
-  <path d="M32 52 L32 36 Q32 32 36 32 L52 32" stroke="white" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-
-  <!-- Top-right bracket -->
-  <path d="M76 32 L92 32 Q96 32 96 36 L96 52" stroke="white" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-
-  <!-- Bottom-left bracket -->
-  <path d="M32 76 L32 92 Q32 96 36 96 L52 96" stroke="white" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-
-  <!-- Bottom-right bracket -->
-  <path d="M76 96 L92 96 Q96 96 96 92 L96 76" stroke="white" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-
-  <!-- Center highlight marker -->
-  <g transform="translate(64, 64)">
-    <rect x="-16" y="-4" width="32" height="8" rx="2" fill="url(#grad2)" transform="rotate(-45)"/>
+  
+  <!-- Rounded background -->
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#bg)"/>
+  
+  <!-- Capture brackets - thick white -->
+  <!-- Top-left -->
+  <path d="M28 50 L28 32 Q28 28 32 28 L50 28" stroke="white" stroke-width="8" fill="none" stroke-linecap="round"/>
+  
+  <!-- Top-right -->
+  <path d="M78 28 L96 28 Q100 28 100 32 L100 50" stroke="white" stroke-width="8" fill="none" stroke-linecap="round"/>
+  
+  <!-- Bottom-left -->
+  <path d="M28 78 L28 96 Q28 100 32 100 L50 100" stroke="white" stroke-width="8" fill="none" stroke-linecap="round"/>
+  
+  <!-- Bottom-right -->
+  <path d="M78 100 L96 100 Q100 100 100 96 L100 78" stroke="white" stroke-width="8" fill="none" stroke-linecap="round"/>
+  
+  <!-- Center highlight/clip icon -->
+  <g transform="translate(64, 64) rotate(-45)">
+    <rect x="-20" y="-6" width="40" height="12" rx="3" fill="#fbbf24"/>
+    <rect x="-20" y="-6" width="12" height="12" rx="3" fill="#f59e0b"/>
   </g>
-
-  <!-- Small sparkle accents -->
-  <circle cx="98" cy="30" r="4" fill="white" opacity="0.8"/>
-  <circle cx="104" cy="24" r="2" fill="white" opacity="0.6"/>
 </svg>
