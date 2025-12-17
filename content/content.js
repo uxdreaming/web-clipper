@@ -82,6 +82,77 @@ function getColorButtonsHtml(isDarkPalette, activeIndex = -1) {
   ).join('') + `<button class="lc-palette-toggle" title="Switch palette">${isDarkPalette ? '🌙' : '☀️'}</button>`;
 }
 
+// Simple HTML to Markdown conversion
+function htmlToMarkdown(html) {
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+
+  // Process headings
+  temp.querySelectorAll('h1').forEach(el => el.outerHTML = `# ${el.textContent}\n\n`);
+  temp.querySelectorAll('h2').forEach(el => el.outerHTML = `## ${el.textContent}\n\n`);
+  temp.querySelectorAll('h3').forEach(el => el.outerHTML = `### ${el.textContent}\n\n`);
+  temp.querySelectorAll('h4,h5,h6').forEach(el => el.outerHTML = `#### ${el.textContent}\n\n`);
+
+  // Process links
+  temp.querySelectorAll('a').forEach(el => {
+    const href = el.getAttribute('href') || '';
+    el.outerHTML = `[${el.textContent}](${href})`;
+  });
+
+  // Process bold/strong
+  temp.querySelectorAll('strong, b').forEach(el => el.outerHTML = `**${el.textContent}**`);
+
+  // Process italic/em
+  temp.querySelectorAll('em, i').forEach(el => el.outerHTML = `*${el.textContent}*`);
+
+  // Process code
+  temp.querySelectorAll('code').forEach(el => el.outerHTML = `\`${el.textContent}\``);
+
+  // Process blockquotes
+  temp.querySelectorAll('blockquote').forEach(el => {
+    const lines = el.textContent.split('\n').map(l => `> ${l}`).join('\n');
+    el.outerHTML = lines + '\n\n';
+  });
+
+  // Process lists
+  temp.querySelectorAll('ul li').forEach(el => el.outerHTML = `- ${el.textContent}\n`);
+  temp.querySelectorAll('ol li').forEach((el, i) => el.outerHTML = `${i + 1}. ${el.textContent}\n`);
+
+  // Process paragraphs
+  temp.querySelectorAll('p').forEach(el => el.outerHTML = `${el.textContent}\n\n`);
+
+  // Process images
+  temp.querySelectorAll('img').forEach(el => {
+    const alt = el.getAttribute('alt') || '';
+    const src = el.getAttribute('src') || '';
+    el.outerHTML = `![${alt}](${src})\n\n`;
+  });
+
+  // Clean up and return
+  return temp.textContent
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+// Copy text to clipboard
+async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (e) {
+    // Fallback for older browsers
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    return true;
+  }
+}
+
 // Smart word selection - expand selection to word boundaries
 function expandToWordBoundaries(range) {
   const wordChars = /[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9_-]/;
@@ -603,42 +674,33 @@ class EditPicker {
     this.stop();
   }
 
-  capture() {
+  async capture() {
     const selectedElements = this.allElements.filter(el => !this.excludedElements.includes(el));
 
     if (selectedElements.length === 0) {
-      alert('No elements selected.');
       return;
     }
 
     const sortedElements = this.sortByDOMOrder(selectedElements);
 
-    const htmlParts = [];
-    const textParts = [];
+    // Convert to Markdown
+    const html = sortedElements.map(el => el.outerHTML).join('\n\n');
+    let markdown = htmlToMarkdown(html);
 
-    sortedElements.forEach(el => {
-      htmlParts.push(el.outerHTML);
-      textParts.push(el.innerText);
-    });
+    // Add source info
+    markdown = `# ${document.title}\n\nSource: ${window.location.href}\n\n---\n\n${markdown}`;
 
-    // Build highlight data
-    const highlightData = this.highlights.map(h => ({
-      text: h.text,
-      color: h.color,
-      colorName: this.palette.find(c => c.color === h.color)?.name || 'Highlight'
-    }));
+    // Add highlights if any
+    if (this.highlights.length > 0) {
+      const highlightsSection = this.highlights.map(h => {
+        const colorName = this.palette.find(c => c.color === h.color)?.name || 'Highlight';
+        return `- ==${h.text}== (${colorName})`;
+      }).join('\n');
+      markdown += `\n\n## Highlights\n${highlightsSection}`;
+    }
 
-    chrome.runtime.sendMessage({
-      type: 'elementCaptured',
-      data: {
-        html: htmlParts.join('\n\n'),
-        text: textParts.join('\n\n'),
-        title: document.title,
-        url: window.location.href,
-        elementCount: selectedElements.length,
-        highlights: highlightData
-      }
-    });
+    // Copy to clipboard
+    await copyToClipboard(markdown);
 
     this.stop();
   }
@@ -844,11 +906,10 @@ class SelectPicker {
     this.stop();
   }
 
-  capture() {
+  async capture() {
     const selection = window.getSelection();
 
     if (!selection.toString().trim()) {
-      alert('No text selected.');
       return;
     }
 
@@ -861,27 +922,13 @@ class SelectPicker {
     selection.addRange(range);
 
     const text = selection.toString().trim();
-    const container = document.createElement('div');
-    container.appendChild(range.cloneContents());
-
-    // Get color info
     const colorName = this.palette.find(c => c.color === this.currentColor)?.name || 'Highlight';
 
-    chrome.runtime.sendMessage({
-      type: 'elementCaptured',
-      data: {
-        html: container.innerHTML,
-        text: text,
-        title: document.title,
-        url: window.location.href,
-        elementCount: 1,
-        highlights: [{
-          text: text,
-          color: this.currentColor,
-          colorName: colorName
-        }]
-      }
-    });
+    // Build markdown with highlight
+    const markdown = `> ==${text}==\n\nSource: [${document.title}](${window.location.href})`;
+
+    // Copy to clipboard
+    await copyToClipboard(markdown);
 
     this.stop();
   }

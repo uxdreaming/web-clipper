@@ -7,153 +7,32 @@
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <div class="container" id="app">
-    <!-- Header -->
+  <div class="container">
     <header class="header">
       <h1 class="logo">Web Clipper</h1>
-      <div class="header-actions">
-        <button class="header-btn" id="themeToggle" title="Toggle dark mode">
-          <span class="icon-sun">☀️</span>
-          <span class="icon-moon">🌙</span>
-        </button>
-        <button class="header-btn" id="settingsBtn" title="Settings">⚙️</button>
-      </div>
+      <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="icon-light">☀️</span>
+        <span class="icon-dark">🌙</span>
+      </button>
     </header>
 
-    <!-- Capture Mode Selection -->
-    <section class="capture-section" id="captureSection">
-      <h2>Capture Mode</h2>
-      <div class="capture-buttons two-buttons">
-        <button class="capture-btn" id="captureEdit" title="Full content, click to remove">
-          <span class="btn-icon">✏️</span>
-          <span>Edit</span>
-          <span class="btn-desc">Full content, click to remove</span>
-        </button>
-        <button class="capture-btn" id="captureSelect" title="Highlight text to capture">
-          <span class="btn-icon">🖍️</span>
-          <span>Select</span>
-          <span class="btn-desc">Highlight text to capture</span>
-        </button>
-      </div>
-    </section>
+    <div class="modes">
+      <button class="mode-btn" id="editMode">
+        <span class="mode-icon">✂️</span>
+        <span class="mode-name">Edit</span>
+        <span class="mode-desc">Full page, click to remove</span>
+      </button>
 
-    <!-- Settings Panel (inline, hidden by default) -->
-    <section class="settings-section hidden" id="settingsSection">
-      <div class="settings-header">
-        <h2>Settings</h2>
-        <button class="close-btn" id="closeSettings">✕</button>
-      </div>
-
-      <div class="setting-item">
-        <label>Journal Format</label>
-        <select id="journalFormat" class="setting-select">
-          <option value="yyyy-MM-dd">yyyy-MM-dd (2024-01-15)</option>
-          <option value="yyyy_MM_dd">yyyy_MM_dd (2024_01_15)</option>
-          <option value="dd-MM-yyyy">dd-MM-yyyy (15-01-2024)</option>
-          <option value="MMM do, yyyy">MMM do, yyyy (Jan 15th, 2024)</option>
-        </select>
-      </div>
-
-      <div class="setting-item">
-        <label>Default Format</label>
-        <select id="defaultFormat" class="setting-select">
-          <option value="markdown">Markdown</option>
-          <option value="logseq">Logseq Blocks</option>
-        </select>
-      </div>
-
-      <div class="setting-item">
-        <label>Default Destination</label>
-        <select id="defaultDestination" class="setting-select">
-          <option value="journal">Journal (Today)</option>
-          <option value="page">Page</option>
-        </select>
-      </div>
-    </section>
-
-    <!-- Editor Section (hidden initially) -->
-    <section class="editor-section hidden" id="editorSection">
-      <!-- Metadata -->
-      <div class="metadata">
-        <input type="text" id="titleInput" class="input-field" placeholder="Title">
-        <input type="text" id="urlInput" class="input-field" placeholder="URL" readonly>
-        <input type="text" id="tagsInput" class="input-field" placeholder="Tags (comma separated)">
-      </div>
-
-      <!-- Format Selection -->
-      <div class="format-section">
-        <h3>Output Format</h3>
-        <div class="format-buttons">
-          <button class="format-btn active" data-format="markdown">Markdown</button>
-          <button class="format-btn" data-format="logseq">Logseq Blocks</button>
-          <button class="format-btn" data-format="template">Template</button>
-        </div>
-        <select id="templateSelect" class="template-select hidden">
-          <option value="">Select template...</option>
-          <option value="article">Article</option>
-          <option value="video">Video/YouTube</option>
-          <option value="tweet">Tweet/Social</option>
-          <option value="recipe">Recipe</option>
-          <option value="custom">Custom</option>
-        </select>
-      </div>
-
-      <!-- Content Editor -->
-      <div class="editor-container">
-        <div class="editor-tabs">
-          <button class="tab-btn active" data-tab="preview">Preview</button>
-          <button class="tab-btn" data-tab="source">Edit Source</button>
-        </div>
-        <div class="editor-content">
-          <div class="preview-pane" id="previewPane"></div>
-          <textarea class="source-pane hidden" id="sourcePane" placeholder="Edit content here..."></textarea>
-        </div>
-      </div>
-
-      <!-- Destination -->
-      <div class="destination-section">
-        <h3>Save to</h3>
-        <div class="destination-tabs">
-          <button class="dest-btn active" data-dest="journal">Journal</button>
-          <button class="dest-btn" data-dest="page">Page</button>
-        </div>
-
-        <div class="journal-options" id="journalOptions">
-          <input type="date" id="journalDate" class="input-field">
-        </div>
-
-        <div class="page-options hidden" id="pageOptions">
-          <input type="text" id="pageSearch" class="input-field" placeholder="Search or create page...">
-          <ul class="page-suggestions" id="pageSuggestions"></ul>
-        </div>
-
-        <div class="position-options">
-          <label>
-            <input type="radio" name="position" value="prepend"> Add to beginning
-          </label>
-          <label>
-            <input type="radio" name="position" value="append" checked> Append to end
-          </label>
-        </div>
-      </div>
-
-      <!-- Actions -->
-      <div class="actions">
-        <button class="btn btn-secondary" id="backBtn">Back</button>
-        <button class="btn btn-primary" id="copyBtn">Copy to Clipboard</button>
-      </div>
-    </section>
-
-    <!-- Status Messages -->
-    <div class="status-bar hidden" id="statusBar">
-      <span class="status-message" id="statusMessage"></span>
+      <button class="mode-btn" id="selectMode">
+        <span class="mode-icon">🖍️</span>
+        <span class="mode-name">Select</span>
+        <span class="mode-desc">Highlight text to capture</span>
+      </button>
     </div>
+
+    <p class="hint">Content will be copied to clipboard as Markdown</p>
   </div>
 
-  <script src="../lib/turndown.min.js"></script>
-  <script src="../lib/storage.js"></script>
-  <script src="../lib/templates.js"></script>
-  <script src="../lib/logseq-formatter.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>
