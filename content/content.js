@@ -1,4 +1,4 @@
-// Logseq Web Clipper - Content Script
+// Web Clipper - Content Script
 // Two modes: Edit (subtractive) and Select (text selection)
 // Both modes include highlight color functionality
 

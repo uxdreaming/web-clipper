@@ -1,21 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#4a9eff"/>
-      <stop offset="100%" style="stop-color:#3a7edf"/>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#14b8a6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d7d79;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
     </linearGradient>
   </defs>
-  <!-- Background circle -->
-  <circle cx="64" cy="64" r="60" fill="url(#bg)"/>
-  <!-- Clipboard shape -->
-  <rect x="35" y="28" width="58" height="76" rx="6" fill="white" opacity="0.95"/>
-  <!-- Clipboard top -->
-  <rect x="48" y="20" width="32" height="16" rx="4" fill="#2d6abf"/>
-  <!-- Lines representing text -->
-  <rect x="45" y="48" width="38" height="4" rx="2" fill="#4a9eff"/>
-  <rect x="45" y="60" width="32" height="4" rx="2" fill="#4a9eff" opacity="0.7"/>
-  <rect x="45" y="72" width="36" height="4" rx="2" fill="#4a9eff" opacity="0.5"/>
-  <rect x="45" y="84" width="28" height="4" rx="2" fill="#4a9eff" opacity="0.3"/>
-  <!-- Logseq-style bullet -->
-  <circle cx="45" cy="50" r="3" fill="#2d6abf"/>
+
+  <!-- Background rounded square -->
+  <rect x="8" y="8" width="112" height="112" rx="24" ry="24" fill="url(#grad1)"/>
+
+  <!-- Inner capture brackets - white -->
+  <!-- Top-left bracket -->
+  <path d="M32 52 L32 36 Q32 32 36 32 L52 32" stroke="white" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Top-right bracket -->
+  <path d="M76 32 L92 32 Q96 32 96 36 L96 52" stroke="white" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Bottom-left bracket -->
+  <path d="M32 76 L32 92 Q32 96 36 96 L52 96" stroke="white" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Bottom-right bracket -->
+  <path d="M76 96 L92 96 Q96 96 96 92 L96 76" stroke="white" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Center highlight marker -->
+  <g transform="translate(64, 64)">
+    <rect x="-16" y="-4" width="32" height="8" rx="2" fill="url(#grad2)" transform="rotate(-45)"/>
+  </g>
+
+  <!-- Small sparkle accents -->
+  <circle cx="98" cy="30" r="4" fill="white" opacity="0.8"/>
+  <circle cx="104" cy="24" r="2" fill="white" opacity="0.6"/>
 </svg>

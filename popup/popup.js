@@ -1,4 +1,4 @@
-// Logseq Web Clipper - Popup Script
+// Web Clipper - Popup Script
 
 class LogseqClipper {
   constructor() {

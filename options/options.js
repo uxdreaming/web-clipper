@@ -1,4 +1,4 @@
-// Logseq Web Clipper - Options Page
+// Web Clipper - Options Page
 
 class OptionsPage {
   constructor() {

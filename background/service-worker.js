@@ -1,4 +1,4 @@
-// Logseq Web Clipper - Background Service Worker
+// Web Clipper - Background Service Worker
 
 // Handle messages from content scripts
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
