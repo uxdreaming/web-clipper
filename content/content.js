@@ -2,6 +2,10 @@
 // Two modes: Edit (subtractive) and Select (text selection)
 // Both modes include highlight color functionality
 
+// Prevent multiple injections
+if (typeof window.webClipperLoaded === 'undefined') {
+window.webClipperLoaded = true;
+
 // Color palettes for highlighting
 // Light palette: for light background content (fluorescent colors)
 const COLORS_FOR_LIGHT_BG = [
@@ -899,3 +903,5 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   return true;
 });
+
+} // End of webClipperLoaded guard
