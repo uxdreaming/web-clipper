@@ -6,8 +6,7 @@
   "permissions": [
     "activeTab",
     "storage",
-    "nativeMessaging",
-    "contextMenus",
+    "clipboardWrite",
     "scripting"
   ],
   "host_permissions": [
@@ -29,14 +28,6 @@
   "background": {
     "service_worker": "background/service-worker.js"
   },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content/content.js"],
-      "css": ["content/content.css"],
-      "run_at": "document_idle"
-    }
-  ],
   "options_ui": {
     "page": "options/options.html",
     "open_in_tab": true

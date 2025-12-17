@@ -17,6 +17,9 @@ class LogseqClipper {
     // Load theme
     await this.loadTheme();
 
+    // Load settings
+    await this.loadSettings();
+
     // Set today's date as default
     document.getElementById('journalDate').valueAsDate = new Date();
 
@@ -25,6 +28,22 @@ class LogseqClipper {
 
     // Load existing pages for autocomplete
     await this.loadPages();
+
+    // Check for pending captured content
+    await this.checkPendingCapture();
+  }
+
+  async checkPendingCapture() {
+    const result = await chrome.storage.local.get('pendingCapture');
+    if (result.pendingCapture) {
+      this.currentContent = result.pendingCapture;
+      // Clear the pending capture
+      await chrome.storage.local.remove('pendingCapture');
+      // Clear badge
+      chrome.action.setBadgeText({ text: '' });
+      // Show editor with captured content
+      this.showEditor();
+    }
   }
 
   initTurndown() {
@@ -50,14 +69,79 @@ class LogseqClipper {
     }
   }
 
+  async loadSettings() {
+    // Load saved settings
+    const journalFormat = await Storage.getJournalFormat();
+    const defaultFormat = await Storage.get('defaultFormat') || 'markdown';
+    const defaultDestination = await Storage.get('defaultDestination') || 'journal';
+
+    // Apply to UI
+    document.getElementById('journalFormat').value = journalFormat;
+    document.getElementById('defaultFormat').value = defaultFormat;
+    document.getElementById('defaultDestination').value = defaultDestination;
+
+    // Apply to state
+    this.currentFormat = defaultFormat;
+    this.currentDestination = defaultDestination;
+
+    // Update format buttons to match default
+    document.querySelectorAll('.format-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.format === defaultFormat);
+    });
+
+    // Update destination buttons to match default
+    document.querySelectorAll('.dest-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.dest === defaultDestination);
+    });
+    document.getElementById('journalOptions').classList.toggle('hidden', defaultDestination !== 'journal');
+    document.getElementById('pageOptions').classList.toggle('hidden', defaultDestination !== 'page');
+  }
+
+  toggleSettings() {
+    const settingsSection = document.getElementById('settingsSection');
+    const captureSection = document.getElementById('captureSection');
+    const editorSection = document.getElementById('editorSection');
+
+    if (settingsSection.classList.contains('hidden')) {
+      // Show settings
+      settingsSection.classList.remove('hidden');
+      captureSection.classList.add('hidden');
+      editorSection.classList.add('hidden');
+    } else {
+      // Hide settings, show appropriate section
+      settingsSection.classList.add('hidden');
+      if (this.currentContent) {
+        editorSection.classList.remove('hidden');
+      } else {
+        captureSection.classList.remove('hidden');
+      }
+    }
+  }
+
   bindEvents() {
     // Theme toggle
     document.getElementById('themeToggle').addEventListener('click', () => this.toggleTheme());
 
+    // Settings button - toggle inline settings
+    document.getElementById('settingsBtn').addEventListener('click', () => this.toggleSettings());
+    document.getElementById('closeSettings').addEventListener('click', () => this.toggleSettings());
+
+    // Settings changes
+    document.getElementById('journalFormat').addEventListener('change', (e) => {
+      Storage.set({ journalFormat: e.target.value });
+    });
+    document.getElementById('defaultFormat').addEventListener('change', (e) => {
+      Storage.set({ defaultFormat: e.target.value });
+      this.currentFormat = e.target.value;
+    });
+    document.getElementById('defaultDestination').addEventListener('change', (e) => {
+      Storage.set({ defaultDestination: e.target.value });
+      this.currentDestination = e.target.value;
+    });
+
     // Capture buttons
-    document.getElementById('captureSelection').addEventListener('click', () => this.capture('selection'));
-    document.getElementById('capturePage').addEventListener('click', () => this.capture('page'));
-    document.getElementById('captureElement').addEventListener('click', () => this.capture('element'));
+    document.getElementById('captureEdit').addEventListener('click', () => this.capture('edit'));
+    document.getElementById('captureSelect').addEventListener('click', () => this.capture('select'));
 
     // Format buttons
     document.querySelectorAll('.format-btn').forEach(btn => {
@@ -92,8 +176,18 @@ class LogseqClipper {
     // Back button
     document.getElementById('backBtn').addEventListener('click', () => this.showCaptureSection());
 
-    // Save button
-    document.getElementById('saveBtn').addEventListener('click', () => this.save());
+    // Copy button
+    document.getElementById('copyBtn').addEventListener('click', () => this.copyToClipboard());
+  }
+
+  async copyToClipboard() {
+    try {
+      const content = document.getElementById('sourcePane').value;
+      await navigator.clipboard.writeText(content);
+      this.showStatus('Copied to clipboard!');
+    } catch (error) {
+      this.showStatus('Error copying: ' + error.message, true);
+    }
   }
 
   async toggleTheme() {
@@ -114,98 +208,52 @@ class LogseqClipper {
       // Get current tab
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-      let result;
-
-      if (mode === 'selection') {
-        result = await this.captureSelection(tab.id);
-      } else if (mode === 'page') {
-        result = await this.capturePage(tab.id);
-      } else if (mode === 'element') {
-        result = await this.captureElement(tab.id);
-        return; // Element capture shows picker, doesn't return immediately
-      }
-
-      if (result) {
-        this.currentContent = {
-          title: tab.title,
-          url: tab.url,
-          html: result.html,
-          text: result.text,
-          date: new Date().toISOString().split('T')[0]
-        };
-
-        this.showEditor();
+      if (mode === 'edit') {
+        await this.startEditMode(tab.id);
+        return;
+      } else if (mode === 'select') {
+        await this.startSelectMode(tab.id);
+        return;
       }
     } catch (error) {
-      this.showStatus('Error capturing content: ' + error.message, true);
+      this.showStatus('Error: ' + error.message, true);
     }
   }
 
-  async captureSelection(tabId) {
-    const results = await chrome.scripting.executeScript({
+  async injectContentScript(tabId) {
+    // Inject the content script and CSS if not already loaded
+    await chrome.scripting.insertCSS({
       target: { tabId },
-      func: () => {
-        const selection = window.getSelection();
-        if (selection.rangeCount === 0) {
-          return null;
-        }
-
-        const range = selection.getRangeAt(0);
-        const container = document.createElement('div');
-        container.appendChild(range.cloneContents());
-
-        return {
-          html: container.innerHTML,
-          text: selection.toString()
-        };
-      }
+      files: ['content/content.css']
     });
 
-    const result = results[0]?.result;
-    if (!result || !result.text) {
-      this.showStatus('No text selected. Please select some text first.', true);
-      return null;
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      files: ['content/content.js']
+    });
+
+    // Small delay to ensure script is initialized
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+
+  async startEditMode(tabId) {
+    try {
+      await this.injectContentScript(tabId);
+      await chrome.tabs.sendMessage(tabId, { action: 'startEditMode' });
+      window.close();
+    } catch (error) {
+      this.showStatus('Error: ' + error.message, true);
     }
-
-    return result;
   }
 
-  async capturePage(tabId) {
-    const results = await chrome.scripting.executeScript({
-      target: { tabId },
-      func: () => {
-        // Try to get main content
-        const article = document.querySelector('article') ||
-          document.querySelector('main') ||
-          document.querySelector('[role="main"]') ||
-          document.querySelector('.post-content') ||
-          document.querySelector('.article-content') ||
-          document.querySelector('.entry-content') ||
-          document.body;
-
-        // Clone and clean
-        const clone = article.cloneNode(true);
-
-        // Remove unwanted elements
-        const unwanted = clone.querySelectorAll('script, style, nav, header, footer, aside, .sidebar, .comments, .advertisement, .ad');
-        unwanted.forEach(el => el.remove());
-
-        return {
-          html: clone.innerHTML,
-          text: clone.innerText
-        };
-      }
-    });
-
-    return results[0]?.result;
-  }
-
-  async captureElement(tabId) {
-    // Send message to content script to activate element picker
-    await chrome.tabs.sendMessage(tabId, { action: 'startElementPicker' });
-
-    // Close popup - content script will handle the rest
-    window.close();
+  async startSelectMode(tabId) {
+    try {
+      await this.injectContentScript(tabId);
+      await chrome.tabs.sendMessage(tabId, { action: 'startSelectMode' });
+      window.close();
+    } catch (error) {
+      this.showStatus('Error: ' + error.message, true);
+    }
   }
 
   showEditor() {
@@ -243,6 +291,14 @@ class LogseqClipper {
       content = this.turndownService
         ? this.turndownService.turndown(this.currentContent.html)
         : this.currentContent.text;
+    }
+
+    // Append highlights section if there are any
+    if (this.currentContent.highlights && this.currentContent.highlights.length > 0) {
+      const highlightsSection = this.currentContent.highlights.map(h =>
+        `- ==${h.text}== ^^${h.colorName}^^`
+      ).join('\n');
+      content += '\n\n## Highlights\n' + highlightsSection;
     }
 
     document.getElementById('sourcePane').value = content;
@@ -310,6 +366,8 @@ class LogseqClipper {
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/`(.+?)`/g, '<code>$1</code>')
       .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>')
+      .replace(/==(.+?)==/g, '<mark style="background: rgba(255,255,0,0.4)">$1</mark>')
+      .replace(/\^\^(.+?)\^\^/g, '<span style="color: #888; font-size: 11px;">($1)</span>')
       .replace(/\n/g, '<br>')
       .replace(/<li>/g, '<ul><li>')
       .replace(/<\/li>/g, '</li></ul>')
@@ -346,8 +404,7 @@ class LogseqClipper {
   }
 
   async loadPages() {
-    // This will be populated by the native host
-    // For now, use recent pages from storage
+    // Load recent pages from storage
     this.availablePages = await Storage.getRecentPages();
   }
 
@@ -388,50 +445,42 @@ class LogseqClipper {
     try {
       const content = document.getElementById('sourcePane').value;
       const title = document.getElementById('titleInput').value;
-      const tags = document.getElementById('tagsInput').value;
-      const position = document.querySelector('input[name="position"]:checked').value;
+      const url = document.getElementById('urlInput').value;
 
-      let filename, folder;
-
+      // Determine target page
+      let targetPage;
       if (this.currentDestination === 'journal') {
-        const date = document.getElementById('journalDate').valueAsDate || new Date();
-        const format = await Storage.getJournalFormat();
-        filename = LogseqFormatter.getJournalFilename(date, format);
-        folder = 'journals';
+        targetPage = 'TODAY';
       } else {
-        const pageName = document.getElementById('pageSearch').value || title;
-        filename = LogseqFormatter.getPageFilename(pageName);
-        folder = 'pages';
+        targetPage = document.getElementById('pageSearch').value || title;
         // Add to recent pages
-        await Storage.addRecentPage(pageName);
+        await Storage.addRecentPage(targetPage);
       }
 
-      // Send to native host
-      const response = await this.sendToNativeHost({
-        action: 'save',
-        folder,
-        filename,
-        content,
-        position
-      });
-
-      if (response.success) {
-        this.showStatus('Saved to Logseq!');
-        setTimeout(() => window.close(), 1500);
-      } else {
-        this.showStatus('Error: ' + response.error, true);
+      // Build Logseq Quick Capture URL
+      const params = new URLSearchParams();
+      params.set('url', url);
+      params.set('title', title);
+      params.set('content', content);
+      if (targetPage) {
+        params.set('page', targetPage);
       }
+      params.set('append', 'true');
+
+      const logseqUrl = `logseq://x-callback-url/quickCapture?${params.toString()}`;
+
+      // Also copy to clipboard as backup
+      await navigator.clipboard.writeText(content);
+
+      // Open Logseq with the content
+      window.open(logseqUrl);
+
+      this.showStatus('Opening Logseq...');
+      setTimeout(() => window.close(), 1000);
+
     } catch (error) {
-      this.showStatus('Error saving: ' + error.message, true);
+      this.showStatus('Error: ' + error.message, true);
     }
-  }
-
-  async sendToNativeHost(message) {
-    return new Promise((resolve) => {
-      chrome.runtime.sendMessage({ type: 'nativeMessage', data: message }, (response) => {
-        resolve(response || { success: false, error: 'No response from native host' });
-      });
-    });
   }
 
   showStatus(message, isError = false) {

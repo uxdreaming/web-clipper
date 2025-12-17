@@ -10,6 +10,7 @@
   pointer-events: none;
 }
 
+/* Main toolbar */
 #logseq-clipper-overlay .lc-toolbar {
   position: fixed;
   top: 20px;
@@ -18,15 +19,33 @@
   background: #1a1a1a;
   color: white;
   padding: 12px 20px;
-  border-radius: 8px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   gap: 16px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
   pointer-events: auto;
   z-index: 2147483647;
+}
+
+#logseq-clipper-overlay .lc-status {
+  color: #a0a0a0;
+  transition: color 0.2s;
+}
+
+#logseq-clipper-overlay .lc-status.highlight-mode {
+  color: #ffd54f;
+}
+
+#logseq-clipper-overlay .lc-count {
+  background: #0d7d79;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 13px;
 }
 
 #logseq-clipper-overlay .lc-toolbar button {
@@ -39,6 +58,16 @@
   transition: all 0.2s;
 }
 
+#logseq-clipper-overlay #lc-restore {
+  background: #333;
+  color: #aaa;
+}
+
+#logseq-clipper-overlay #lc-restore:hover {
+  background: #444;
+  color: white;
+}
+
 #logseq-clipper-overlay #lc-cancel {
   background: #404040;
   color: white;
@@ -49,26 +78,260 @@
 }
 
 #logseq-clipper-overlay #lc-capture {
-  background: #4a9eff;
+  background: #333;
+  color: #666;
+  cursor: not-allowed;
+}
+
+#logseq-clipper-overlay #lc-capture.ready {
+  background: #0d7d79;
   color: white;
+  cursor: pointer;
 }
 
-#logseq-clipper-overlay #lc-capture:hover {
-  background: #3a8eef;
+#logseq-clipper-overlay #lc-capture.ready:hover {
+  background: #0a6563;
 }
 
-#logseq-clipper-highlight {
+/* Color bar - separate floating element */
+#logseq-clipper-overlay .lc-color-bar {
+  position: fixed;
+  top: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a1a;
+  padding: 8px 12px;
+  border-radius: 20px;
+  display: flex;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+  z-index: 2147483647;
+}
+
+.lc-color-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  padding: 0;
+}
+
+.lc-color-btn:hover {
+  transform: scale(1.2);
+}
+
+.lc-color-btn.active {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 2px #1a1a1a, 0 0 0 4px white;
+}
+
+.lc-palette-toggle {
+  width: 28px;
+  height: 24px;
+  border-radius: 12px;
+  border: 1px solid #444;
+  background: #2a2a2a;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 4px;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.lc-palette-toggle:hover {
+  background: #3a3a3a;
+  border-color: #666;
+  transform: scale(1.1);
+}
+
+/* Hover highlight - will EXCLUDE (red) */
+#logseq-clipper-highlight,
+.lc-highlight-exclude {
   position: absolute;
   pointer-events: none;
-  border: 2px solid #4a9eff;
-  background: rgba(74, 158, 255, 0.1);
+  border: 2px dashed #f44336;
+  background: rgba(244, 67, 54, 0.1);
   z-index: 2147483645;
   display: none;
   transition: all 0.1s ease;
+  border-radius: 4px;
 }
 
-#logseq-clipper-highlight.selected {
-  border-color: #4caf50;
-  background: rgba(76, 175, 80, 0.15);
-  border-width: 3px;
+/* Hover on excluded element - will RESTORE (teal) */
+.lc-highlight-restore {
+  position: absolute;
+  pointer-events: none;
+  border: 2px dashed #0d7d79 !important;
+  background: rgba(13, 125, 121, 0.1) !important;
+  z-index: 2147483645;
+  display: block;
+  transition: all 0.1s ease;
+  border-radius: 4px;
+}
+
+/* Selected elements (teal border) - INCLUDED */
+.lc-selected {
+  outline: 2px solid #0d7d79 !important;
+  outline-offset: 2px;
+  background-color: rgba(13, 125, 121, 0.05) !important;
+  position: relative;
+}
+
+/* Excluded elements (red, strikethrough effect) */
+.lc-excluded {
+  outline: 2px dashed #f44336 !important;
+  outline-offset: 2px;
+  background-color: rgba(244, 67, 54, 0.08) !important;
+  opacity: 0.5;
+  position: relative;
+}
+
+/* X badge on excluded elements */
+.lc-excluded::before {
+  content: '✕';
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 22px;
+  height: 22px;
+  background: #f44336;
+  border-radius: 50%;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2147483644;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* Text highlight marks */
+.lc-text-highlight {
+  padding: 1px 0;
+  border-radius: 2px;
+  cursor: default;
+}
+
+
+/* ============================================
+   SELECT MODE STYLES
+   ============================================ */
+
+/* Instruction banner with color picker */
+#logseq-select-instruction {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a1a;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  z-index: 2147483647;
+  animation: lc-slideDown 0.3s ease;
+}
+
+#logseq-select-instruction > span {
+  color: #a0a0a0;
+}
+
+#logseq-select-instruction .lc-highlight-colors {
+  display: flex;
+  gap: 6px;
+}
+
+#logseq-select-instruction button#lc-instruction-cancel {
+  padding: 6px 12px;
+  background: #404040;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+
+#logseq-select-instruction button#lc-instruction-cancel:hover {
+  background: #505050;
+}
+
+@keyframes lc-slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Selection toolbar (appears when text selected) */
+#logseq-select-toolbar {
+  position: absolute;
+  transform: translateX(-50%);
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  z-index: 2147483647;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+
+#logseq-select-toolbar.lc-select-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#logseq-select-toolbar.lc-select-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+#logseq-select-toolbar button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+#logseq-select-toolbar #lc-select-capture {
+  background: #0d7d79;
+  color: white;
+}
+
+#logseq-select-toolbar #lc-select-capture:hover {
+  background: #0a6563;
+}
+
+#logseq-select-toolbar #lc-select-cancel {
+  background: #404040;
+  color: #aaa;
+  padding: 8px 12px;
+}
+
+#logseq-select-toolbar #lc-select-cancel:hover {
+  background: #505050;
+  color: white;
 }

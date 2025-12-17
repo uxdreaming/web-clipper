@@ -11,28 +11,63 @@
     <!-- Header -->
     <header class="header">
       <h1 class="logo">Logseq Clipper</h1>
-      <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">
-        <span class="icon-sun">☀️</span>
-        <span class="icon-moon">🌙</span>
-      </button>
+      <div class="header-actions">
+        <button class="header-btn" id="themeToggle" title="Toggle dark mode">
+          <span class="icon-sun">☀️</span>
+          <span class="icon-moon">🌙</span>
+        </button>
+        <button class="header-btn" id="settingsBtn" title="Settings">⚙️</button>
+      </div>
     </header>
 
     <!-- Capture Mode Selection -->
     <section class="capture-section" id="captureSection">
       <h2>Capture Mode</h2>
-      <div class="capture-buttons">
-        <button class="capture-btn" id="captureSelection" title="Capture selected text">
-          <span class="btn-icon">📝</span>
-          <span>Selection</span>
+      <div class="capture-buttons two-buttons">
+        <button class="capture-btn" id="captureEdit" title="Full content, click to remove">
+          <span class="btn-icon">✏️</span>
+          <span>Edit</span>
+          <span class="btn-desc">Full content, click to remove</span>
         </button>
-        <button class="capture-btn" id="capturePage" title="Capture full page">
-          <span class="btn-icon">📄</span>
-          <span>Full Page</span>
+        <button class="capture-btn" id="captureSelect" title="Highlight text to capture">
+          <span class="btn-icon">🖍️</span>
+          <span>Select</span>
+          <span class="btn-desc">Highlight text to capture</span>
         </button>
-        <button class="capture-btn" id="captureElement" title="Click to select element">
-          <span class="btn-icon">🎯</span>
-          <span>Element</span>
-        </button>
+      </div>
+    </section>
+
+    <!-- Settings Panel (inline, hidden by default) -->
+    <section class="settings-section hidden" id="settingsSection">
+      <div class="settings-header">
+        <h2>Settings</h2>
+        <button class="close-btn" id="closeSettings">✕</button>
+      </div>
+
+      <div class="setting-item">
+        <label>Journal Format</label>
+        <select id="journalFormat" class="setting-select">
+          <option value="yyyy-MM-dd">yyyy-MM-dd (2024-01-15)</option>
+          <option value="yyyy_MM_dd">yyyy_MM_dd (2024_01_15)</option>
+          <option value="dd-MM-yyyy">dd-MM-yyyy (15-01-2024)</option>
+          <option value="MMM do, yyyy">MMM do, yyyy (Jan 15th, 2024)</option>
+        </select>
+      </div>
+
+      <div class="setting-item">
+        <label>Default Format</label>
+        <select id="defaultFormat" class="setting-select">
+          <option value="markdown">Markdown</option>
+          <option value="logseq">Logseq Blocks</option>
+        </select>
+      </div>
+
+      <div class="setting-item">
+        <label>Default Destination</label>
+        <select id="defaultDestination" class="setting-select">
+          <option value="journal">Journal (Today)</option>
+          <option value="page">Page</option>
+        </select>
       </div>
     </section>
 
@@ -94,18 +129,18 @@
 
         <div class="position-options">
           <label>
-            <input type="radio" name="position" value="append" checked> Append to end
+            <input type="radio" name="position" value="prepend"> Add to beginning
           </label>
           <label>
-            <input type="radio" name="position" value="prepend"> Add to beginning
+            <input type="radio" name="position" value="append" checked> Append to end
           </label>
         </div>
       </div>
 
       <!-- Actions -->
       <div class="actions">
-        <button class="btn btn-secondary" id="backBtn">← Back</button>
-        <button class="btn btn-primary" id="saveBtn">Save to Logseq</button>
+        <button class="btn btn-secondary" id="backBtn">Back</button>
+        <button class="btn btn-primary" id="copyBtn">Copy to Clipboard</button>
       </div>
     </section>
 
