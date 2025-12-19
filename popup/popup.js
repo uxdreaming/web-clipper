@@ -14,17 +14,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     await chrome.storage.local.set({ theme: isDark ? 'dark' : 'light' });
   });
 
-  // Edit mode
-  document.getElementById('editMode').addEventListener('click', async () => {
+  // Remove mode (start with all selected)
+  document.getElementById('removeMode').addEventListener('click', async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    await injectAndStart(tab.id, 'startEditMode');
+    await injectAndStart(tab.id, 'startRemoveMode');
     window.close();
   });
 
-  // Select mode
-  document.getElementById('selectMode').addEventListener('click', async () => {
+  // Add mode (start with nothing selected)
+  document.getElementById('addMode').addEventListener('click', async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    await injectAndStart(tab.id, 'startSelectMode');
+    await injectAndStart(tab.id, 'startAddMode');
     window.close();
   });
 });
